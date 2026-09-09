@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "noether",
+  "version": "${version}",
+  "name": "Noether Client",
+  "description": "Visual and utility client for Fabric 1.20.4. Inspired by Expensive, Celestial, Stark and Wild.",
+  "authors": ["Noether"],
+  "contact": {
+    "homepage": "https://github.com/kdkdamls4-boop/Neother-mod",
+    "sources": "https://github.com/kdkdamls4-boop/Neother-mod"
+  },
+  "license": "MIT",
+  "icon": "assets/noether/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.noether.client.NoetherClient"
+    ]
+  },
+  "mixins": [
+    "noether.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.20.4",
+    "java": ">=17",
+    "fabric-api": "*"
+  }
+}

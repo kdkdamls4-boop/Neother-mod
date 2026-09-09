@@ -1,0 +1,15 @@
+.gradle/
+build/
+out/
+run/
+*.iml
+.idea/
+.vscode/
+*.class
+.DS_Store
+sourcesets.gradle
+bin/
+logs/
+*.log
+.arena/
+node_modules/
