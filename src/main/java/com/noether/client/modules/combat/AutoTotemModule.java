@@ -6,6 +6,7 @@ import com.noether.client.modules.Module;
 import com.noether.client.settings.BooleanSetting;
 import com.noether.client.settings.NumberSetting;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.PlayerScreenHandler;
 
@@ -14,11 +15,20 @@ public class AutoTotemModule extends Module {
     private final BooleanSetting smart = add(new BooleanSetting("Smart", "Только при реальной угрозе", true));
     private final BooleanSetting restore = add(new BooleanSetting("Restore", "Вернуть предмет в оффхэнд", true));
 
-    private int previousOffhandSlot = -1;
+    /** Inventory index where the previous offhand item was parked after the swap. */
+    private int parkedOffhandItemSlot = -1;
+    private ItemStack previousOffhand = ItemStack.EMPTY;
     private boolean holdingTotem;
 
     public AutoTotemModule() {
         super("AutoTotem", "Умный свап тотема в оффхэнд с порогом HP", Category.COMBAT);
+    }
+
+    @Override
+    protected void onDisable() {
+        parkedOffhandItemSlot = -1;
+        previousOffhand = ItemStack.EMPTY;
+        holdingTotem = false;
     }
 
     @Override
@@ -36,9 +46,10 @@ public class AutoTotemModule extends Module {
         if (offhandIsTotem) {
             holdingTotem = true;
             if (restore.getBool() && smart.getBool() && hp.getFloat() > 0 && health > hp.getFloat() + 4
-                    && previousOffhandSlot != -1) {
-                InventoryUtils.swapToOffhand(client, previousOffhandSlot);
-                previousOffhandSlot = -1;
+                    && parkedOffhandItemSlot != -1) {
+                InventoryUtils.swapToOffhand(client, parkedOffhandItemSlot);
+                parkedOffhandItemSlot = -1;
+                previousOffhand = ItemStack.EMPTY;
                 holdingTotem = false;
             }
             return;
@@ -46,13 +57,16 @@ public class AutoTotemModule extends Module {
 
         if (!danger) return;
 
-        int slot = InventoryUtils.findItem(client.player, Items.TOTEM_OF_UNDYING);
-        if (slot == -1) return;
+        int totemSlot = InventoryUtils.findItem(client.player, Items.TOTEM_OF_UNDYING);
+        if (totemSlot == -1 || totemSlot == 40) return;
 
-        if (!client.player.getOffHandStack().isEmpty()) {
-            previousOffhandSlot = slot;
+        ItemStack offhand = client.player.getOffHandStack();
+        if (!offhand.isEmpty() && previousOffhand.isEmpty()) {
+            previousOffhand = offhand.copy();
+            // SWAP puts the current offhand item into totemSlot.
+            parkedOffhandItemSlot = totemSlot;
         }
-        InventoryUtils.swapToOffhand(client, slot);
+        InventoryUtils.swapToOffhand(client, totemSlot);
         holdingTotem = true;
     }
 

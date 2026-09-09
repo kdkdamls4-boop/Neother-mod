@@ -43,6 +43,7 @@ public class FreeCamModule extends Module {
         }
         freezePackets = false;
         origin = null;
+        camPos = null;
     }
 
     @Override

@@ -1,16 +1,22 @@
 package com.noether.client.core;
 
+import java.util.UUID;
+
 /**
  * Silent rotations: desired yaw/pitch are applied to movement packets only.
+ * {@link #hasBeenSent()} is true after the look packet actually went out —
+ * KillAura must wait for that before attacking (GrimAC raytrace).
  */
 public final class RotationManager {
     private static final RotationManager INSTANCE = new RotationManager();
 
     private boolean active;
+    private boolean sent;
     private float yaw;
     private float pitch;
     private float serverYaw;
     private float serverPitch;
+    private UUID targetId;
 
     private RotationManager() {}
 
@@ -19,6 +25,14 @@ public final class RotationManager {
     }
 
     public void set(float yaw, float pitch) {
+        set(yaw, pitch, targetId);
+    }
+
+    public void set(float yaw, float pitch, UUID target) {
+        if (target == null || targetId == null || !target.equals(targetId)) {
+            sent = false;
+        }
+        this.targetId = target;
         this.yaw = yaw;
         this.pitch = pitch;
         this.active = true;
@@ -26,10 +40,22 @@ public final class RotationManager {
 
     public void clear() {
         this.active = false;
+        this.sent = false;
+        this.targetId = null;
     }
 
     public boolean isActive() {
         return active;
+    }
+
+    public void markSent() {
+        if (active) {
+            this.sent = true;
+        }
+    }
+
+    public boolean hasBeenSent() {
+        return active && sent;
     }
 
     public float getYaw() {

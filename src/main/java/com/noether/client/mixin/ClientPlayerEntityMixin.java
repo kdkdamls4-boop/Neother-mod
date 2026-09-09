@@ -41,5 +41,6 @@ public class ClientPlayerEntityMixin {
         self.setYaw(noether$yaw);
         self.setPitch(noether$pitch);
         noether$rotated = false;
+        RotationManager.getInstance().markSent();
     }
 }

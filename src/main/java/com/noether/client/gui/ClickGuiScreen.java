@@ -25,6 +25,8 @@ public class ClickGuiScreen extends Screen {
     private final Set<Module> expanded = new HashSet<>();
     private Module binding;
     private NumberSetting sliding;
+    private int sliderX;
+    private int sliderW = 94;
     private long openTime;
 
     public ClickGuiScreen() {
@@ -114,7 +116,10 @@ public class ClickGuiScreen extends Screen {
     }
 
     private void applySlider(NumberSetting setting, double mouseX) {
-        // filled by panel when it knows the slider rect; fallback no-op
+        if (setting == null) return;
+        double t = (mouseX - sliderX) / (double) sliderW;
+        t = Math.max(0.0, Math.min(1.0, t));
+        setting.set(setting.getMin() + t * (setting.getMax() - setting.getMin()));
     }
 
     private class Panel {
@@ -233,9 +238,9 @@ public class ClickGuiScreen extends Screen {
             else if (s instanceof ModeSetting m) m.cycle();
             else if (s instanceof NumberSetting n) {
                 sliding = n;
-                double t = (mx - (x + 8)) / 94.0;
-                t = Math.max(0, Math.min(1, t));
-                n.set(n.getMin() + t * (n.getMax() - n.getMin()));
+                sliderX = x + 8;
+                sliderW = 94;
+                applySlider(n, mx);
             } else if (s instanceof ColorSetting c && button == 1) {
                 ThemeManager.setCustomColor(c.getRgb());
                 ThemeManager.setTheme(ThemeManager.Theme.CUSTOM);

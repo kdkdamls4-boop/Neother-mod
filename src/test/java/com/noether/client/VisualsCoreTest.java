@@ -2,6 +2,7 @@ package com.noether.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.noether.client.core.RotationManager;
 import com.noether.client.config.ConfigData;
 import com.noether.client.config.ConfigManager;
 import com.noether.client.config.ThemeManager;
@@ -10,6 +11,7 @@ import com.noether.client.friend.FriendManager;
 import com.noether.client.gui.hud.Notification;
 import com.noether.client.gui.hud.NotificationManager;
 import com.noether.client.util.ColorUtils;
+import com.noether.client.util.SlotMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -198,6 +200,39 @@ public class VisualsCoreTest {
         now.addAndGet(5000);
         nm.update(now.get());
         assertTrue(nm.getActive().isEmpty());
+    }
+
+    @Test
+    void testSilentRotationSendGate() {
+        RotationManager rot = RotationManager.getInstance();
+        rot.clear();
+        java.util.UUID id = java.util.UUID.randomUUID();
+        rot.set(90f, 10f, id);
+        assertFalse(rot.hasBeenSent());
+        rot.markSent();
+        assertTrue(rot.hasBeenSent());
+        rot.set(91f, 11f, id);
+        assertTrue(rot.hasBeenSent());
+        rot.set(0f, 0f, java.util.UUID.randomUUID());
+        assertFalse(rot.hasBeenSent());
+        rot.clear();
+        assertFalse(rot.isActive());
+        assertFalse(rot.hasBeenSent());
+    }
+
+    @Test
+    void testInventorySlotMap() {
+        assertEquals(36, SlotMap.inventoryToHandler(0));
+        assertEquals(44, SlotMap.inventoryToHandler(8));
+        assertEquals(9, SlotMap.inventoryToHandler(9));
+        assertEquals(35, SlotMap.inventoryToHandler(35));
+        assertEquals(8, SlotMap.inventoryToHandler(36));
+        assertEquals(7, SlotMap.inventoryToHandler(37));
+        assertEquals(6, SlotMap.inventoryToHandler(38));
+        assertEquals(5, SlotMap.inventoryToHandler(39));
+        assertEquals(45, SlotMap.inventoryToHandler(40));
+        assertEquals(-1, SlotMap.inventoryToHandler(41));
+        assertEquals(-1, SlotMap.inventoryToHandler(-1));
     }
 
     @Test

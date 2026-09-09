@@ -56,12 +56,25 @@ public class KillAuraModule extends Module {
                 target.getX(), target.getEyeY(), target.getZ()
         );
 
+        RotationManager rotations = RotationManager.getInstance();
         if (silent.getBool()) {
-            RotationManager.getInstance().set(rot[0], rot[1]);
+            rotations.set(rot[0], rot[1], target.getUuid());
+            // Wait until the look packet actually left (GrimAC raytraces server angles).
+            if (!rotations.hasBeenSent()) {
+                return;
+            }
+            if (!TargetManager.raytraceFromRotation(client, target,
+                    rotations.getServerYaw(), rotations.getServerPitch(),
+                    range.get(), walls.getBool())) {
+                return;
+            }
         } else {
             client.player.setYaw(rot[0]);
             client.player.setPitch(rot[1]);
-            RotationManager.getInstance().clear();
+            rotations.clear();
+            if (!TargetManager.raytraceFromRotation(client, target, rot[0], rot[1], range.get(), walls.getBool())) {
+                return;
+            }
         }
 
         if (cooldown.getBool() && client.player.getAttackCooldownProgress(0.5f) < 1.0f) {

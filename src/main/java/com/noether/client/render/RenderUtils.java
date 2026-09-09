@@ -14,18 +14,38 @@ public final class RenderUtils {
 
     public static void roundRect(DrawContext context, int x, int y, int w, int h, int r, int color) {
         r = Math.min(r, Math.min(w, h) / 2);
+        if (r <= 0) {
+            context.fill(x, y, x + w, y + h, color);
+            return;
+        }
         context.fill(x + r, y, x + w - r, y + h, color);
         context.fill(x, y + r, x + r, y + h - r, color);
         context.fill(x + w - r, y + r, x + w, y + h - r, color);
-        context.fill(x + r, y, x + r + 1, y + 1, color);
-        context.fill(x + w - r - 1, y, x + w - r, y + 1, color);
-        context.fill(x + r, y + h - 1, x + r + 1, y + h, color);
-        context.fill(x + w - r - 1, y + h - 1, x + w - r, y + h, color);
-        // corner blobs
-        context.fill(x, y + r / 2, x + r, y + r, color);
-        context.fill(x, y + h - r, x + r, y + h - r / 2, color);
-        context.fill(x + w - r, y + r / 2, x + w, y + r, color);
-        context.fill(x + w - r, y + h - r, x + w, y + h - r / 2, color);
+        fillQuarter(context, x + r, y + r, r, color, 0);
+        fillQuarter(context, x + w - r - 1, y + r, r, color, 1);
+        fillQuarter(context, x + r, y + h - r - 1, r, color, 2);
+        fillQuarter(context, x + w - r - 1, y + h - r - 1, r, color, 3);
+    }
+
+    private static void fillQuarter(DrawContext context, int cx, int cy, int r, int color, int corner) {
+        int r2 = r * r;
+        for (int dy = 0; dy <= r; dy++) {
+            int dx = (int) Math.round(Math.sqrt(r2 - dy * dy));
+            int y = switch (corner) {
+                case 0, 1 -> cy - dy;
+                default -> cy + dy;
+            };
+            int x1;
+            int x2;
+            if (corner == 0 || corner == 2) {
+                x1 = cx - dx;
+                x2 = cx + 1;
+            } else {
+                x1 = cx;
+                x2 = cx + dx + 1;
+            }
+            context.fill(x1, y, x2, y + 1, color);
+        }
     }
 
     public static void outline(DrawContext context, int x, int y, int w, int h, int color) {

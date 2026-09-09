@@ -20,7 +20,7 @@ public class StaffAlertModule extends Module {
     private final BooleanSetting spectators = add(new BooleanSetting("Spectators", "Невидимые наблюдатели рядом", true));
 
     private static final Pattern STAFF = Pattern.compile(
-            ".*(staff|moder|admin|curator|helper|helper|ютубер|moder|админ|стафф|куратор|хелпер).*",
+            ".*(staff|moderator|moder|admin|curator|helper|ютубер|админ|стафф|куратор|хелпер).*",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
     );
 

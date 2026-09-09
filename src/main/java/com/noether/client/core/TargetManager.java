@@ -98,6 +98,34 @@ public final class TargetManager {
         return result.getType() == HitResult.Type.MISS || result.getPos().squaredDistanceTo(target) < 0.36;
     }
 
+    /**
+     * Grim-style check: the look vector from {@code yaw/pitch} must intersect the target hitbox,
+     * and (unless {@code throughWalls}) must not hit a block first.
+     */
+    public static boolean raytraceFromRotation(MinecraftClient client, Entity entity,
+                                               float yaw, float pitch, double range, boolean throughWalls) {
+        if (client.player == null || client.world == null || entity == null) return false;
+        Vec3d eye = client.player.getEyePos();
+        Vec3d look = Vec3d.fromPolar(pitch, yaw);
+        Vec3d end = eye.add(look.multiply(range));
+        Box box = entity.getBoundingBox().expand(entity.getTargetingMargin());
+        var hit = box.raycast(eye, end);
+        if (hit.isEmpty() && !box.contains(eye)) {
+            return false;
+        }
+        if (throughWalls) {
+            return true;
+        }
+        Vec3d aim = hit.orElse(entity.getBoundingBox().getCenter());
+        HitResult block = client.world.raycast(new RaycastContext(
+                eye, aim,
+                RaycastContext.ShapeType.COLLIDER,
+                RaycastContext.FluidHandling.NONE,
+                client.player
+        ));
+        return block.getType() == HitResult.Type.MISS || block.getPos().squaredDistanceTo(aim) < 0.36;
+    }
+
     public static double angleTo(MinecraftClient client, Entity entity) {
         Vec3d diff = entity.getEyePos().subtract(client.player.getEyePos()).normalize();
         Vec3d look = client.player.getRotationVec(1.0f).normalize();

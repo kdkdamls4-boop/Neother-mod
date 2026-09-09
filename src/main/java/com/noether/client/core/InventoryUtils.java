@@ -1,5 +1,6 @@
 package com.noether.client.core;
 
+import com.noether.client.util.SlotMap;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -35,9 +36,9 @@ public final class InventoryUtils {
 
     public static void swapToOffhand(MinecraftClient client, int invSlot) {
         if (client.interactionManager == null || client.player == null) return;
-        int sync = client.player.currentScreenHandler.syncId;
-        // Player inventory slot index in the survival screen handler: 9-44, offhand 45.
         int containerSlot = inventoryToHandler(invSlot);
+        if (containerSlot < 0) return;
+        int sync = client.player.currentScreenHandler.syncId;
         client.interactionManager.clickSlot(sync, containerSlot, 40, SlotActionType.SWAP, client.player);
     }
 
@@ -48,9 +49,6 @@ public final class InventoryUtils {
     }
 
     public static int inventoryToHandler(int invSlot) {
-        if (invSlot >= 0 && invSlot < 9) {
-            return 36 + invSlot;
-        }
-        return invSlot;
+        return SlotMap.inventoryToHandler(invSlot);
     }
 }
